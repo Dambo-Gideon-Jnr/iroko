@@ -32,3 +32,8 @@ dist/
 .coverage
 coverage.xml
 
+# local sqlite DB for dev
+/iroko-flask/bookings.db
+
+# local keys
+.keys/

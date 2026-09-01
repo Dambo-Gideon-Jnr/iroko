@@ -51,7 +51,24 @@ HOTEL_OPS = ["Marina Court", "Maitama House", "Creekview Lodge", "Tinapa Inn", "
 app = Flask(__name__)
 
 
+import os
+from sqlalchemy import create_engine, text
+
+# Database configuration: prefer DATABASE_URL (Postgres/managed DB). If absent, fall back to local SQLite file.
+DATABASE_URL = os.environ.get("DATABASE_URL")
+engine = None
+if DATABASE_URL:
+    # create engine for the provided URL (e.g. postgres://... or postgresql+psycopg2://...)
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+
+
 def get_db():
+    """Return a DB handle. If a managed DATABASE_URL is set, the module-level engine
+    will be used for connections; otherwise a sqlite3 connection to the local bookings.db file is returned.
+    """
+    if engine:
+        # Return the Engine for callers to use; higher-level functions will use engine.connect()/begin().
+        return engine
     if "db" not in g:
         g.db = sqlite3.connect(DB)
         g.db.row_factory = sqlite3.Row
@@ -66,16 +83,29 @@ def close_db(_exc):
 
 
 def init_db():
-    db = sqlite3.connect(DB)
-    db.execute(
-        """CREATE TABLE IF NOT EXISTS bookings (
-            id TEXT PRIMARY KEY,
-            payload TEXT NOT NULL,
-            created_at TEXT NOT NULL
-        )"""
-    )
-    db.commit()
-    db.close()
+    if engine:
+        # Create bookings table in managed DB if it doesn't exist
+        with engine.begin() as conn:
+            conn.execute(text(
+                """
+                CREATE TABLE IF NOT EXISTS bookings (
+                    id TEXT PRIMARY KEY,
+                    payload TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            ))
+    else:
+        db = sqlite3.connect(DB)
+        db.execute(
+            """CREATE TABLE IF NOT EXISTS bookings (
+                id TEXT PRIMARY KEY,
+                payload TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )"""
+        )
+        db.commit()
+        db.close()
 
 
 def city_by_name(name: str):
@@ -227,12 +257,19 @@ def book():
                 "phone": phone,
                 "total": offer["price"] * travelers,
             }
-            db = get_db()
-            db.execute(
-                "INSERT INTO bookings (id, payload, created_at) VALUES (?, ?, datetime('now'))",
-                (bid, json.dumps(payload)),
-            )
-            db.commit()
+            # Persist booking: use the managed DATABASE_URL if present, otherwise write to local sqlite file.
+            if engine:
+                with engine.begin() as conn:
+                    conn.execute(text(
+                        "INSERT INTO bookings (id, payload) VALUES (:id, :payload)"
+                    ), {"id": bid, "payload": json.dumps(payload)})
+            else:
+                db = get_db()
+                db.execute(
+                    "INSERT INTO bookings (id, payload, created_at) VALUES (?, ?, datetime('now'))",
+                    (bid, json.dumps(payload)),
+                )
+                db.commit()
             return redirect(url_for("confirm", id=bid))
     return render_template(
         "book.html",
@@ -251,8 +288,15 @@ def book():
 @app.route("/confirm")
 def confirm():
     bid = request.args.get("id", "")
-    row = get_db().execute("SELECT payload FROM bookings WHERE id = ?", (bid,)).fetchone()
-    booking = json.loads(row["payload"]) if row else None
+    booking = None
+    if engine:
+        with engine.connect() as conn:
+            res = conn.execute(text("SELECT payload FROM bookings WHERE id = :id"), {"id": bid})
+            row = res.fetchone()
+            booking = json.loads(row[0]) if row else None
+    else:
+        row = get_db().execute("SELECT payload FROM bookings WHERE id = ?", (bid,)).fetchone()
+        booking = json.loads(row["payload"]) if row else None
     return render_template("confirm.html", booking=booking, naira=naira)
 
 
@@ -277,8 +321,14 @@ def destination(slug):
 
 @app.route("/trips")
 def trips():
-    rows = get_db().execute("SELECT payload FROM bookings ORDER BY created_at DESC").fetchall()
-    items = [json.loads(r["payload"]) for r in rows]
+    items = []
+    if engine:
+        with engine.connect() as conn:
+            res = conn.execute(text("SELECT payload FROM bookings ORDER BY created_at DESC"))
+            items = [json.loads(r[0]) for r in res.fetchall()]
+    else:
+        rows = get_db().execute("SELECT payload FROM bookings ORDER BY created_at DESC").fetchall()
+        items = [json.loads(r["payload"]) for r in rows]
     return render_template("trips.html", trips=items, naira=naira)
 
 
