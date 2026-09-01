@@ -1,6 +1,12 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "Dockerfile", "use": "@vercel/docker" }
+  "functions": {
+    "api/index.py": {
+      "runtime": "python3.12"
+    }
+  },
+  "routes": [
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/(.*)", "dest": "/api/index.py" }
   ]
 }
