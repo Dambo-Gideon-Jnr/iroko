@@ -12,7 +12,7 @@
   <div class="grid">
     {% for city in cities %}
     <a class="card" href="{{ url_for('destination', slug=city.id) }}">
-      <img src="{{ url_for('static', filename='destinations/' + city.image) }}" alt="{{ city.name }}" />
+      <img src="{{ city.image if city.image.startswith('http') else url_for('static', filename='destinations/' + city.image) }}" alt="{{ city.name }}" />
       <div class="pad">
         <h3>{{ city.name }} <small>{{ city.code }}</small></h3>
         <p>{{ city.blurb }}</p>

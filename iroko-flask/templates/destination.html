@@ -2,7 +2,7 @@
 {% block title %}{{ city.name }} — Iroko{% endblock %}
 {% block body %}
 <div class="hero-img">
-  <img src="{{ url_for('static', filename='destinations/' + city.image) }}" alt="{{ city.name }}" />
+  <img src="{{ city.image if city.image.startswith('http') else url_for('static', filename='destinations/' + city.image) }}" alt="{{ city.name }}" />
 </div>
 <section class="wrap">
   <p class="muted">{{ city.state }} · {{ city.code }}</p>
