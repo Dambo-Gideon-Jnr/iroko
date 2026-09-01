@@ -13,9 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev &
 COPY iroko-flask/ /app
 
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8080
+ENV PYTHONUNBUFFERED=1
 
+# Allow Vercel to set PORT at runtime; default to 8080
+ENV PORT=8080
 EXPOSE 8080
 
-# Use gunicorn to serve the Flask app
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:8080", "--workers", "1", "--threads", "4"]
+# Use gunicorn to serve the Flask app and bind to $PORT set by the environment
+CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT:-8080} --workers 1 --threads 4"]
