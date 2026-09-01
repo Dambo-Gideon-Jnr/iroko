@@ -50,7 +50,6 @@ HOTEL_OPS = ["Marina Court", "Maitama House", "Creekview Lodge", "Tinapa Inn", "
 
 app = Flask(__name__)
 
-
 import os
 from sqlalchemy import create_engine, text
 
@@ -106,6 +105,10 @@ def init_db():
         )
         db.commit()
         db.close()
+
+
+# Ensure the database is present before the app serves traffic under gunicorn / Vercel.
+init_db()
 
 
 def city_by_name(name: str):
