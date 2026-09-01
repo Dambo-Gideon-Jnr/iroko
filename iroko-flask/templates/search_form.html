@@ -1,0 +1,25 @@
+<form class="panel" action="{{ url_for('search') }}" method="get">
+  <div class="tabs">
+    <label><input type="radio" name="type" value="flight" {% if kind is not defined or kind == 'flight' %}checked{% endif %} /> Flight</label>
+    <label><input type="radio" name="type" value="bus" {% if kind is defined and kind == 'bus' %}checked{% endif %} /> Bus</label>
+    <label><input type="radio" name="type" value="hotel" {% if kind is defined and kind == 'hotel' %}checked{% endif %} /> Stay</label>
+  </div>
+  <div class="fields">
+    <label>From
+      <input name="from" list="cities" value="{{ origin if origin is defined else 'Lagos' }}" required />
+    </label>
+    <label>To
+      <input name="to" list="cities" value="{{ dest if dest is defined else 'Abuja' }}" required />
+    </label>
+    <label>Date
+      <input type="date" name="date" value="{{ when if when else tomorrow }}" required />
+    </label>
+    <label>Travelers
+      <input type="number" name="travelers" min="1" max="8" value="{{ travelers if travelers is defined else 1 }}" />
+    </label>
+  </div>
+  <datalist id="cities">
+    {% for n in city_names %}<option value="{{ n }}"></option>{% endfor %}
+  </datalist>
+  <button type="submit">Search Nigeria</button>
+</form>

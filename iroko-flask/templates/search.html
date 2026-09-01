@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Search — Iroko{% endblock %}
+{% block body %}
+<section class="wrap">
+  <h1>{% if kind == 'hotel' %}Stays in {{ dest }}{% else %}{{ origin }} to {{ dest }}{% endif %}</h1>
+  <p class="muted">{{ when }} · {{ travelers }} traveler{{ 's' if travelers != 1 }}</p>
+  {% include "search_form.html" %}
+  {% if not offers %}
+    <p class="empty">No options for that pair. Try Lagos to Abuja.</p>
+  {% else %}
+    <ul class="offers">
+      {% for o in offers %}
+      <li>
+        <div>
+          <strong>{{ o.operator }}</strong> <span class="pill">{{ o.cabin }}</span>
+          {% if o.type == 'hotel' %}
+            <p class="muted">Check-in {{ o.depart }} · {{ o.seats }} rooms left</p>
+          {% else %}
+            <p class="times">{{ o.depart }} <span>{{ o.duration }}</span> {{ o.arrive }}</p>
+          {% endif %}
+        </div>
+        <div class="price">
+          <p>{{ naira(o.price) }}</p>
+          <a class="btn" href="{{ url_for('book', offerId=o.id, type=kind, **{'from': origin, 'to': dest, 'date': when, 'travelers': travelers}) }}">Select</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ city.name }} — Iroko{% endblock %}
+{% block body %}
+<div class="hero-img">
+  <img src="{{ url_for('static', filename='destinations/' + city.image) }}" alt="{{ city.name }}" />
+</div>
+<section class="wrap">
+  <p class="muted">{{ city.state }} · {{ city.code }}</p>
+  <h1>{{ city.name }}</h1>
+  <p>{{ city.blurb }}</p>
+  <p><strong>Best time:</strong> {{ city.best }}</p>
+  <p>
+    <a class="btn" href="{{ url_for('search', type='flight', **{'from': origin, 'to': city.name, 'date': tomorrow, 'travelers': 1}) }}">Book a flight</a>
+    <a class="btn ghost" href="{{ url_for('search', type='bus', **{'from': origin, 'to': city.name, 'date': tomorrow, 'travelers': 1}) }}">Book a bus</a>
+    <a class="btn ghost" href="{{ url_for('search', type='hotel', **{'from': origin, 'to': city.name, 'date': tomorrow, 'travelers': 1}) }}">Book a stay</a>
+  </p>
+</section>
+{% endblock %}

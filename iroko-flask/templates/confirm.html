@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Confirmed — Iroko{% endblock %}
+{% block body %}
+<section class="wrap narrow">
+  {% if not booking %}
+    <h1>No booking found</h1>
+    <a class="btn" href="{{ url_for('trips') }}">My trips</a>
+  {% else %}
+    <p class="kicker">Payment simulated</p>
+    <h1>You are booked.</h1>
+    <div class="panel">
+      <p class="muted">Booking reference</p>
+      <p class="times">{{ booking.id }}</p>
+      <p>{{ booking.offer.operator }} · {{ booking.offer.cabin }}</p>
+      <p>{{ booking.date }} · {{ booking.name }}</p>
+      <p>{{ naira(booking.total) }}</p>
+    </div>
+    <p><a class="btn" href="{{ url_for('trips') }}">View my trips</a>
+       <a class="btn ghost" href="{{ url_for('home') }}">Book another</a></p>
+  {% endif %}
+</section>
+{% endblock %}

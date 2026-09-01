@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}My trips — Iroko{% endblock %}
+{% block body %}
+<section class="wrap narrow">
+  <h1>My trips</h1>
+  {% if not trips %}
+    <p class="empty">No bookings yet. <a href="{{ url_for('home') }}">Search a route</a></p>
+  {% else %}
+    <ul class="offers">
+      {% for t in trips %}
+      <li>
+        <div>
+          <strong>{{ t.id }}</strong>
+          <p>{{ t.offer.operator }} · {{ t.offer.from }} → {{ t.offer.to }}</p>
+          <p class="muted">{{ t.date }} · {{ t.name }}</p>
+        </div>
+        <div class="price">
+          <p>{{ naira(t.total) }}</p>
+          <a href="{{ url_for('confirm', id=t.id) }}">Open ticket</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>
+{% endblock %}

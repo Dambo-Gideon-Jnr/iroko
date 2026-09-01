@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Iroko — Travel Nigeria{% endblock %}
+{% block body %}
+<section class="hero">
+  <p class="kicker">Domestic Nigeria</p>
+  <h1>Book the next city, not the next continent.</h1>
+  <p class="lede">Flights, intercity buses, and stays. Search in naira.</p>
+  {% include "search_form.html" %}
+</section>
+<section class="wrap">
+  <h2>Where people actually go</h2>
+  <div class="grid">
+    {% for city in cities %}
+    <a class="card" href="{{ url_for('destination', slug=city.id) }}">
+      <img src="{{ url_for('static', filename='destinations/' + city.image) }}" alt="{{ city.name }}" />
+      <div class="pad">
+        <h3>{{ city.name }} <small>{{ city.code }}</small></h3>
+        <p>{{ city.blurb }}</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

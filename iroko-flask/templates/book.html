@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Book — Iroko{% endblock %}
+{% block body %}
+<section class="wrap split">
+  <form method="post" class="panel">
+    <input type="hidden" name="offerId" value="{{ offer.id }}" />
+    <input type="hidden" name="type" value="{{ kind }}" />
+    <input type="hidden" name="from" value="{{ origin }}" />
+    <input type="hidden" name="to" value="{{ dest }}" />
+    <input type="hidden" name="date" value="{{ when }}" />
+    <input type="hidden" name="travelers" value="{{ travelers }}" />
+    <h1>Passenger details</h1>
+    <p class="muted">Simulated checkout. No card is charged.</p>
+    <label>Full name <input name="name" required /></label>
+    <label>Email <input type="email" name="email" required /></label>
+    <label>Phone <input name="phone" placeholder="0803 000 0000" required /></label>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <button type="submit">Confirm {{ naira(total) }}</button>
+  </form>
+  <aside class="panel">
+    <h2>Trip summary</h2>
+    <p>{{ offer.operator }} · {{ offer.cabin }}</p>
+    <p>{% if offer.type == 'hotel' %}{{ offer.to }}{% else %}{{ offer.from }} → {{ offer.to }}{% endif %}</p>
+    <p>{{ when }} · {{ travelers }} traveler{{ 's' if travelers != 1 }}</p>
+    <p class="times">{{ naira(total) }}</p>
+  </aside>
+</section>
+{% endblock %}

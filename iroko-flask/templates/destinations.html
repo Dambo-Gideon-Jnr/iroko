@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Destinations — Iroko{% endblock %}
+{% block body %}
+<section class="wrap">
+  <h1>Destinations</h1>
+  <div class="grid">
+    {% for city in cities %}
+    <a class="card" href="{{ url_for('destination', slug=city.id) }}">
+      <img src="{{ url_for('static', filename='destinations/' + city.image) }}" alt="{{ city.name }}" />
+      <div class="pad">
+        <h3>{{ city.name }} <small>{{ city.state }}</small></h3>
+        <p>{{ city.blurb }}</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
